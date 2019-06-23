@@ -253,8 +253,99 @@ table_WASH_watercollection <- mutate(table_WASH_watercollection, check_WASH = if
 count_watercollection <- count(table_WASH_watercollection, check_WASH)
 
 ### Health Section - Quality Check
+options (scipen = 999)
+##Health H5/H6 :: Check that the responded is not accessing services that he/she selected as not available
+
+table_health_services <- select(fake_dataset,  "uuid", "A1_Metadata", "A2_Metadata", "A3_Metadata", "A4_Metadata", "A6_Metadata", 'H5_Health', 'H6_Health')
+
+table_health_services <- mutate (table_health_services, check_health_H15_16 = ifelse (fake_dataset$`H5_Health/h5_6_1` == 'TRUE' & fake_dataset$`H6_Health/h5_6_1` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_2` == 'TRUE' & fake_dataset$`H6_Health/h5_6_2` == 'TRUE'| 
+                                                                                        fake_dataset$`H5_Health/h5_6_3` == 'TRUE' & fake_dataset$`H6_Health/h5_6_3` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_4` == 'TRUE' & fake_dataset$`H6_Health/h5_6_4` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_5` == 'TRUE' & fake_dataset$`H6_Health/h5_6_5` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_6` == 'TRUE' & fake_dataset$`H6_Health/h5_6_6` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_7` == 'TRUE' & fake_dataset$`H6_Health/h5_6_7` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_8` == 'TRUE' & fake_dataset$`H6_Health/h5_6_8` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_9` == 'TRUE' & fake_dataset$`H6_Health/h5_6_9` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_10` == 'TRUE' & fake_dataset$`H6_Health/h5_6_10` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_11` == 'TRUE' & fake_dataset$`H6_Health/h5_6_11` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_12` == 'TRUE' & fake_dataset$`H6_Health/h5_6_12` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_13` == 'TRUE' & fake_dataset$`H6_Health/h5_6_13` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_14` == 'TRUE' & fake_dataset$`H6_Health/h5_6_14` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_15` == 'TRUE' & fake_dataset$`H6_Health/h5_6_15` == 'TRUE'|
+                                                                                        fake_dataset$`H5_Health/h5_6_16` == 'TRUE' & fake_dataset$`H6_Health/h5_6_16` == 'TRUE',
+                                                                                      0, 1) )
+count_health_services <- count (table_health_services, check_health)
+
+##Health 8 :: check that the figures are normally/log.normally distributed within the group
+Normailty_test_H8<- shapiro.test(fake_dataset$H8_Health)
+Check_H8 <- ifelse (Normailty_test_H8$p.value > 0.05, 0, 1)
+
+## Normality_test_H8  <- find_outliers(fake_dataset$H8_Health)
 
 
+
+##Health 14 :: Check that this question was asked to a household with at least one member with disabilities
+
+table_health_disabilities <- select(fake_dataset,  "uuid", "A1_Metadata", "A2_Metadata", "A3_Metadata", "A4_Metadata", "A6_Metadata", "H14_Health", "check_disable")
+table_health_disabilities <- mutate(table_health_disabilities, Check_health_H14 = ifelse( fake_dataset$`H14_Health/h14_1` == 'TRUE' & fake_dataset$check_disable == 1 |
+                                                                                            fake_dataset$`H14_Health/h14_2`== 'TRUE' & fake_dataset$check_disable == 1 |
+                                                                                            fake_dataset$`H14_Health/h14_3` == 'TRUE' & fake_dataset$check_disable == 1 |
+                                                                                            fake_dataset$`H14_Health/h14_4`== 'TRUE' & fake_dataset$check_disable == 1 ,
+                                                                                          1, 0))
+count_health_H14 <- count(table_health_disabilities, Check_health_H14)
+
+##Health 15 :: Check that this question was asked to a household with at least one female member between 12 and 59
+
+table_health_give_birth <- select(fake_dataset,  "uuid", "A1_Metadata", "A2_Metadata", "A3_Metadata", "A4_Metadata", "A6_Metadata", "H15_Health", "check_pregnant")
+
+table_health_give_birth <- mutate(table_health_give_birth, Check_health_H15 = ifelse(table_health_give_birth$H15_Health == 'yes' & table_health_give_birth$check_pregnant == 1 |
+                                                                                       table_health_give_birth$H15_Health == 'no' & table_health_give_birth$check_pregnant == 0, 1, 0))
+
+count_health_H15 <- count(table_health_give_birth, Check_health_H15)
+
+##Health 16 :: Check that this question was asked to a household with at least one female member between 12 and 59
+table_health_deliver <- select(fake_dataset,  "uuid", "A1_Metadata", "A2_Metadata", "A3_Metadata", "A4_Metadata", "A6_Metadata", "H16_Health", "B712_Gender", "B715_Age")
+table_health_deliver <- mutate(table_health_deliver, check_H16 = ifelse(fake_dataset$H16_Health == 'h16_1' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                                                          fake_dataset$H16_Health == 'h16_2' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                                                          fake_dataset$H16_Health == 'h16_3' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female'|
+                                                                          fake_dataset$H16_Health == 'h16_4' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female', 1,0))
+
+count_health_H16 <- count (table_health_deliver, check_H16)
+
+##Health 17 ::  Check that this question was asked to a household with at least one female member between 12 and 59.
+## Numeric – check that the figures are normally/log.normally distributed within the group
+Normailty_test_H17<-  shapiro.test(fake_dataset$H17_Health)
+Check_H17 <- ifelse (Normailty_test_H17$p.value > 0.05, 0, 1)
+
+#Normailty_test_H17 <- find_outliers(fake_dataset$H17_Health)
+
+table_health_cost <- select(fake_dataset,  "uuid", "A1_Metadata", "A2_Metadata", "A3_Metadata", "A4_Metadata", "A6_Metadata", "H17_Health", "B715_Age", "B712_Gender")
+table_health_cost <- mutate(table_health_cost, check_health17 = ifelse(table_health_cost$H17_Health & table_health_cost$B712_Gender == 'female' & 
+                                                                         table_health_cost$B715_Age >=12 & table_health_cost$B715_Age <=59, 1,0))
+
+count_health_H17 <- count (table_health_cost, check_health17)
+
+## Health 18 :: Check that this question was asked to a household with at least one female member between 12 and 59
+table_health_issues <- select(fake_dataset,  "uuid", "A1_Metadata", "A2_Metadata", "A3_Metadata", "A4_Metadata", "A6_Metadata", "H18_Health",  "B712_Gender", "B715_Age")
+table_health_issues <- mutate(table_health_issues, Check_H18 = ifelse 
+                              (fake_dataset$`H18_Health/h18_1` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_2` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_3` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_4` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_5` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_6` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_7` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_8` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_9` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_10` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_11` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_12` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_13` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_14` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_15` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' |
+                                  fake_dataset$`H18_Health/h18_16` == 'TRUE' & fake_dataset$B715_Age >=12 & fake_dataset$B715_Age <=59 & fake_dataset$B712_Gender == 'female' , 1, 0))
+count_health_H18 <- count (table_health_issues, Check_H18)
 
 
 ### Protection Section - Quality Check
